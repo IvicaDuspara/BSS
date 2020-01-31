@@ -8,17 +8,17 @@
 #include <set>
 #include <iterator>
 
-class Grid{
+class ClassicGrid{
 public:
-    Grid (){};
-    explicit Grid(std::array<std::array<int,9>,9> _grid) : grid{_grid} {
+    ClassicGrid (){};
+    explicit ClassicGrid(std::array<std::array<int,9>,9> _grid) : grid{_grid} {
         initial_set_fill();
     };
 
     std::array<std::array<int,9>,9>& get_grid() { return grid;}
 
     void initial_set_fill();
-    friend std::ostream& operator<< (std::ostream&, const Grid& _grid);
+    friend std::ostream& operator<< (std::ostream&, const ClassicGrid& _grid);
 private:
 
     std::array<std::array<int,9>,9> grid;
@@ -26,11 +26,11 @@ private:
 };
 
 
-void Grid::initial_set_fill() {
+void ClassicGrid::initial_set_fill() {
 
 }
 
-std::ostream& operator<< (std::ostream&out, const Grid& _grid) {
+std::ostream& operator<< (std::ostream&out, const ClassicGrid& _grid) {
     out << "- - - - + - - - + - - - -\n";
     for(int i = 0; i < 9; i++) {
         std::cout << "| ";
@@ -54,8 +54,8 @@ std::ostream& operator<< (std::ostream&out, const Grid& _grid) {
 }
 
 template <typename S>
-Grid read_from_file(S&& file_name) {
-    Grid g;
+ClassicGrid read_from_file(S&& file_name) {
+    ClassicGrid g;
     std::ifstream in_file(std::forward<S>(file_name));
     if(!in_file) {
         std::cerr << "Could not open a file at path: " << file_name << std::endl;
