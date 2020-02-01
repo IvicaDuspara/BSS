@@ -9,9 +9,10 @@
 #include <iterator>
 constexpr int cg_height = 9;
 constexpr int cg_width = 9;
+constexpr int valid_sum = 45;
 class ClassicGrid{
 public:
-    ClassicGrid (){};
+    ClassicGrid(){};
     explicit ClassicGrid(std::array<std::array<int,9>,9> _grid) : grid{_grid} {
         initial_set_fill();
     };
@@ -20,24 +21,28 @@ public:
 
     void initial_set_fill();
     void print_allowed_numbers();
+    void solve();
+    bool check_validity();
     friend std::ostream& operator<< (std::ostream&, const ClassicGrid& _grid);
 private:
     void remove_from_column(int column, int removed);
     void remove_from_row(int row, int removed);
     void remove_from_house(int row, int column, int removed);
+    bool first_stage_removal();
+    bool second_stage_removal();
     std::array<std::array<int,cg_width>,cg_height> grid;
     std::array<std::array<std::set<int>,cg_width>,cg_height> allowed_numbers;
 };
 /*========================================================= Public methods: =========================================*/
 void ClassicGrid::print_allowed_numbers() {
     for(int row = 0; row < cg_height; row++) {
-        std::cout << "Row " << (row+1) << ' ';
+        std::cout << "Row " << (row+1) <<'\n';
         for(int column = 0; column < cg_width; column++) {
-            std::cout << "column " << (column+1) << " can contain: (";
+            std::cout << "\t\tcolumn " << (column+1) << " can contain: ";
             for(const auto& element : allowed_numbers[row][column]) {
                 std::cout << element << ' ';
             }
-            std::cout << ")\n";
+            std::cout << "\n";
         }
     }
 }
@@ -68,6 +73,47 @@ void ClassicGrid::initial_set_fill() {
             }
         }
     }
+}
+
+void ClassicGrid::solve() {
+    first_stage_removal();
+}
+
+bool ClassicGrid::check_validity() {
+    for(int i = 0; i < cg_height; i++) {
+        int sum = 0;
+        for(int j = 0; j < cg_width; j++) {
+            sum += grid[i][j];
+        }
+        if(sum != valid_sum) {
+            return false;
+        }
+    }
+    for(int i = 0; i < cg_height; i++) {
+        int sum = 0;
+        for(int j = 0; j < cg_width; j++) {
+            sum += grid[j][i];
+        }
+        if(sum != valid_sum) {
+            return false;
+        }
+    }
+    std::set<int> house_rows{0,3,6};
+    std::set<int> house_columns{0,3,6};
+    for(const auto& hr : house_rows) {
+        for(const auto& hc : house_columns) {
+            int sum = 0;
+            for(int i = hr; i < (hr+3); i++) {
+                for(int j = hc; j < (hc+3); j++) {
+                    sum += grid[i][j];
+                }
+            }
+            if(sum != valid_sum) {
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 /*========================================================= Private methods:  ========================================*/
@@ -102,6 +148,26 @@ void ClassicGrid::remove_from_house(int row, int column, int removed) {
             allowed_numbers[sr][sc].erase(removed);
         }
     }
+}
+
+bool ClassicGrid::first_stage_removal() {
+    bool flag = false;
+    for(int i = 0; i < cg_height; i++) {
+        for(int j = 0; j < cg_width; j++) {
+            if(allowed_numbers[i][j].size() == 1) {
+                flag = true;
+                auto removed = *allowed_numbers[i][j].begin();
+                remove_from_row(i,removed);
+                remove_from_column(j,removed);
+                remove_from_house(i,j,removed);
+                grid[i][j] = removed;
+                allowed_numbers[i][j] = std::set<int>{};
+                i = 0;
+                j = -1;
+            }
+        }
+    }
+    return flag;
 }
 
 std::ostream& operator<< (std::ostream&out, const ClassicGrid& _grid) {
