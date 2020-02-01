@@ -7,6 +7,8 @@
 #include <iostream>
 #include <set>
 #include <iterator>
+#include <map>
+
 constexpr int cg_height = 9;
 constexpr int cg_width = 9;
 constexpr int valid_sum = 45;
@@ -76,7 +78,13 @@ void ClassicGrid::initial_set_fill() {
 }
 
 void ClassicGrid::solve() {
-    first_stage_removal();
+    bool f1 = false, f2 = false;
+    f1 = first_stage_removal();
+    f2 = second_stage_removal();
+    while(f1 || f2) {
+        f1 = first_stage_removal();
+        f2 = second_stage_removal();
+    }
 }
 
 bool ClassicGrid::check_validity() {
@@ -169,6 +177,69 @@ bool ClassicGrid::first_stage_removal() {
     }
     return flag;
 }
+
+bool ClassicGrid::second_stage_removal() {
+    bool flag = false;
+    for(int i = 0; i < cg_height; i++) {
+        std::map<int,int> members;
+        std::map<int,int> column_cord;
+        for(int j = 0; j < cg_width; j++) {
+            for(const auto& elem : allowed_numbers[i][j]) {
+                if(members.find(elem) == members.end()) {
+                    members[elem] = 1;
+                    column_cord.insert(std::make_pair(elem,j));
+                }
+                else {
+                    members[elem]++;
+                    column_cord.erase(elem);
+                }
+            }
+        }
+     //   std::cout << "Završio redak. i je: " << i << '\n';
+        for(const auto& elem : members) {
+         //   std::cout << "Ključ: " << elem.first << " vrijednost: " << elem.second << " lokacija: " << i << " " << column_cord[elem.first] << '\n';
+            if(elem.second == 1) {
+                flag = true;
+                auto column = column_cord[elem.first];
+                grid[i][column] = elem.first;
+                allowed_numbers[i][column] = std::set<int>{};
+                remove_from_row(i,elem.first);
+                remove_from_column(column, elem.first);
+                remove_from_house(i,column,elem.first);
+            }
+        }
+    }
+    for(int i = 0; i < cg_width; i++) {
+        std::map<int,int> members;
+        std::map<int,int> row_cord;
+        for(int j = 0; j < cg_height; j++) {
+            for(const auto& elem: allowed_numbers[j][i]) {
+                if(members.find(elem) == members.end()) {
+                    members[elem] = 1;
+                    row_cord.insert(std::make_pair(elem,j));
+                }
+                else {
+                    members[elem]++;
+                    row_cord.erase(elem);
+                }
+            }
+        }
+        for(const auto& elem : members) {
+            if(elem.second == 1) {
+                flag = true;
+                auto row = row_cord[elem.first];
+                grid[row][i] = elem.first;
+                allowed_numbers[row][i] = std::set<int>{};
+                remove_from_row(row,elem.first);
+                remove_from_column(i,elem.first);
+                remove_from_house(row,i,elem.first);
+            }
+        }
+
+    }
+    return flag;
+}
+
 
 std::ostream& operator<< (std::ostream&out, const ClassicGrid& _grid) {
     out << "- - - - + - - - + - - - -\n";
