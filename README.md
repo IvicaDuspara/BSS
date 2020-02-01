@@ -8,11 +8,11 @@ Basic Sudoku Solver is a program which solves classic sudoku game (9 x 9).
 
 Credits for providing ideas and discussing strategies go to:
 
-..* Marko Duspara
+* Marko Duspara
 
-..* Carlo Grlj
+* Carlo Grlj
 
-..* Lovro Grlj
+* Lovro Grlj
 
-..* Mirjam Hunjek
+* Mirjam Hunjek
 
